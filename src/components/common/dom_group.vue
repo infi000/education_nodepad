@@ -7,17 +7,19 @@
       </el-header>
       <!-- 手写板分组显示区域 -->
       <el-main>
-        <el-row :gutter="20">
-          <el-col :span="6">
+        <el-row :gutter="20" >
+          <el-col :span="6" v-for="(user,index) in onlineList" :key="user">
             <!-- 手写板模块 -->
             <div class="grid-content bg-purple">
               <!-- 显示笔记区域 -->
-              <div class="note-box">
+              <div class="note-box" ref='noteBox'>
+                <h3>小明{{user}} {{index}}</h3>
+                <note :id='1' :div_width='noteBoxWidth'></note>
               </div>
               <!-- 按钮组 -->
               <div>
-                <el-button size="small" class="note-btn">查看</el-button>
-                <el-button size="small" class="note-btn">清空</el-button>
+                <el-button size="small" class="note-btn" @click="goTo(123)">查看</el-button>
+                <el-button size="small" class="note-btn" @click="clean">清空</el-button>
                 <el-button size="small" class="note-btn">推送</el-button>
               </div>
             </div>
@@ -28,16 +30,43 @@
   </el-main>
 </template>
 <script>
+import note from '@/components/widget/note';
 export default {
   data() {
     return {
       activeIndex: '1', //默认NAV选项
+      onlineList:[11,22,33,44,55,66,77,88], //在线用户列表
+      noteBoxWidth:''
     };
+  },
+  components: {
+    note
+  },
+  computed: {
+
   },
   methods: {
     handleSelect(key, keyPath) {
       console.log(key, keyPath);
+    },
+    goTo(id) {
+
+      this.$router.push({ path: 'view', query: { id: id } });
+    },
+    clean() {
+      this.$store.commit('test');
+    },
+    //获取notebox宽度
+    getNoteBoxWidth() {
+
     }
+  },
+  mounted() {
+    var n = this.$refs.noteBox[0];
+    var nw=n.offsetWidth;
+    console.log(n)
+    this.noteBoxWidth=nw;
+
   }
 }
 
@@ -56,9 +85,6 @@ export default {
 }
 
 
-.bg-purple {
-  /*background: #000;*/
-}
 
 
 .grid-content {
@@ -71,11 +97,22 @@ export default {
   background-color: #fff;
   margin-bottom: 10px;
   box-shadow: 0 0 1px 1px #818181;
+  overflow: hidden;
+  position: relative;
 }
 
-.note-btn{
+.note-box h3 {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: 1;
+}
+
+
+.note-btn {
   background-color: #313131;
   color: #fff;
-  border-color:#000;
+  border-color: #000;
 }
+
 </style>
