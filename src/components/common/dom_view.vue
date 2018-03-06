@@ -57,7 +57,7 @@ export default {
 };
 
 </script>
-<style scopted>
+<style scoped>
 .note-btn {
   background-color: #313131;
   color: #daff0f;
