@@ -5,7 +5,7 @@
       <!-- <h3>小明 id:{{user.wid}} </h3> -->
       <img :src="imgSign" class="imgSign">
       <el-button icon="el-icon-search" type="info" @click="view" style="position: absolute;bottom:1px ;right: 1px;padding: 6px;z-index: 1"></el-button>
-      <note :info='signInfo' :loading="note_loading" :div_width='noteBoxWidth' :div_height='noteBoxHeight' v-if="noteshow" v-on:drawover="getNoteInfo(user.wid,wid)"></note>
+      <note :info='signInfo' :bindernote="true" :loading="note_loading" :div_width='noteBoxWidth' :div_height='noteBoxHeight' v-if="noteshow"></note>
     </div>
     <!-- 按钮组 -->
     <div class="note-btn-group">
@@ -14,8 +14,8 @@
       <el-button size="small" class="note-btn" @click="push(user.wid)" v-show="!isPush">推送</el-button>
       <el-button size="small" class="note-btn" @click="undo(user.wid)" v-show="isPush">撤回</el-button>
     </div>
-    <el-dialog title="" :visible.sync="dialogVisible" :width="dialogWidth+'px'" :height="dialogHeight+'px'" ref="dialog" @close="dialogshow=false" @open="dialogshow=true">
-      <note :info="allSignInfo" :loading="note_loading" notimeout="true" :div_width='dialogWidth' :div_height="dialogHeight" v-if="dialogshow"></note>
+    <el-dialog title="" :visible.sync="dialogVisible" :width="dialogWidth+'px'" :height="dialogHeight+'px'" ref="dialog">
+      <note :info="allSignInfo" :loading="note_loading" notimeout="true" :div_width='dialogWidth' :div_height="dialogHeight" v-if="noteshow"></note>
       <!-- 123 -->
     </el-dialog>
   </div>
@@ -26,7 +26,6 @@ import note from '@/components/widget/note';
 export default {
   props: ['user'],
   data() {
-    var id = this.user.wid;
     return {
       dialogWidth: '', //弹窗口宽度
       dialogHeight: '', //弹窗口宽度
@@ -38,26 +37,17 @@ export default {
       signInfo: "", //笔迹信息
       allSignInfo: [], //所有笔迹信息
       wid: "", //最后一条笔迹ID
-      id: id, //用户的ID
       note_loading: "", //笔迹组件LOADDING
       noteshow: true,
-      dialogshow: false, //弹窗笔记开关
     };
   },
   watch: {
     writting() {
       //如果writting开始 执行过去笔迹函数
       if (this.writting) {
-        var that = this;
-        this.noteshow = false;
-        this.signInfo = [];
-        this.allSignInfo = [];
-        setTimeout(function() {
-          that.noteshow = true;
-          that.getNoteInfo(that.id);
-        }, 500);
-
+        this.getNoteInfo(this.id);
       }
+
     },
   },
   computed: {
@@ -84,7 +74,7 @@ export default {
       this.$store.commit('wsSend', o);
       setTimeout(function() {
         that.noteshow = true;
-      }, 100);
+      }, 100)
     },
     //推送
     push(id) {
@@ -137,7 +127,7 @@ export default {
           //2，继续获取剩余笔迹
           //2.1 d.length==0; 间隔2000ms重发 ,
           //2.2 d.length>0; writeid取数组最后一位的writeid字段的值
-
+          var t = 500;
           if (d.length > 0) {
             that.signInfo = d;
             that.note_loading = false;
@@ -146,13 +136,13 @@ export default {
             arr = null;
             var lwid = d[d.length - 1]["writeid"];
             that.wid = lwid;
-            console.log("最后一个wid", that.wid)
           } else {
-
-            setTimeout(() => {
-              that.getNoteInfo(id, that.wid);
-            }, 2000);
+            t = 2000;
           }
+          setTimeout(() => {
+            that.getNoteInfo(id, that.wid);
+          }, t);
+
         }
       };
       this.$store.commit('getNote', opt);

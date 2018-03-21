@@ -11,14 +11,13 @@ export default {
   // div_width:外部容器宽度,
   // notimeout:布尔，是否显示笔迹轨迹
   // bindernote:绑定在binder组件中的，需要从父级组件中props获取笔迹信息
-  props: ['info', 'loading', 'div_width', 'div_height', 'notimeout'],
+  props: ['info', 'bindernote', 'loading', 'div_width', 'notimeout'],
   data() {
     return {
       ctx: '',
       starttime: '',
       resources: '', //笔迹数据集合
       resources_now: '', //当前解析的笔迹
-      coordinate: {}, //坐标信息
       style: {
         box: "",
         canvas: ""
@@ -28,7 +27,7 @@ export default {
   },
   watch: {
     info() {
-      if (this.info.length > 0) {
+      if (this.info&&this.bindernote) {
         this.starttime = window.JSON.parse(this.info[0].writedata).StartTime;
         this.draw();
       }
@@ -55,8 +54,6 @@ export default {
         var points = opt.Points,
           time = that.notimeout ? 0 : (opt.StartTime - starttime) / 10000;
         time = parseInt(time);
-        // console.log("time", time)
-        // console.log(opt.StartTime, starttime);
         for (var i = 1; i < points.length; i++) {
           (function(i) {
             /**
@@ -82,72 +79,54 @@ export default {
         this.resources_now = ls;
         this.changeStyle();
         //绘图
-        // console.log("writeid===",resources[i].writeid)
         draw(ls);
       };
-
-
-      //执行完笔记后再次请求(放大的NOTE组建不用请求)
-      if (!this.notimeout) {
-        var len = resources.length;
-        var start_1=window.JSON.parse(resources[len-1].writedata).StartTime;
-        var start_0=window.JSON.parse(resources[0].writedata).StartTime;
-        var settime = start_1-start_0;
-        setTimeout(function() {
-          that.$emit('drawover');
-        }, settime / 10000)
-      }
     },
     //改变容器和canvasstyle
     changeStyle() {
       if (this.resources_now) {
         var writedata = this.resources_now;
-        var minx = this.coordinate.minx || writedata.PointsRect.X;
-        var miny = this.coordinate.miny || writedata.PointsRect.Y;
-        var maxx = this.coordinate.maxx || writedata.PointsRect.X + writedata.PointsRect.Width;
-        var maxy = this.coordinate.maxy || writedata.PointsRect.Y + writedata.PointsRect.Height;
-
-        // var loadingbox_w=this.$refs.loadingbox.offsetWidth;
-        //   var loadingbox_h=this.$refs.loadingbox.offsetHeight;
-        minx = (minx < writedata.PointsRect.X) ? minx : writedata.PointsRect.X;
-        miny = (miny < writedata.PointsRect.Y) ? miny : writedata.PointsRect.Y;
-        maxx = (maxx > writedata.PointsRect.X + writedata.PointsRect.Width) ? maxx : writedata.PointsRect.X + writedata.PointsRect.Width;
-        maxy = (maxy > writedata.PointsRect.Y + writedata.PointsRect.Height) ? maxy : writedata.PointsRect.Y + writedata.PointsRect.Height;
-        var x = minx;
-        var y = miny;
-        var w = maxx - minx;
-        var h = maxy - miny;
-        var margin_left = "",
-          margin_top = "",
-          left = "",
-          top = "";
-        var zoom = (this.div_width / w > this.div_height / h) ? this.div_height / h : this.div_width / w;
-       zoom = (zoom > 1) ? 1 : zoom;
-        margin_left = -w / 2;
-        left = '50%';
-        margin_top = -h / 2;
-        top = '50%';
+        var old_width = this.style.box.width || writedata.PointsRect.Width;
+        var old_x = this.style.box.x || writedata.PointsRect.X;
+        var old_height = this.style.box.height || writedata.PointsRect.Height;
+        var old_y = this.style.box.y || writedata.PointsRect.Y;
+        var new_width = writedata.PointsRect.Width;
+        var new_x = writedata.PointsRect.X;
+        var new_height = writedata.PointsRect.Height;
+        var new_y = writedata.PointsRect.Y;
+        var old_can_x = this.style.canvas.left || writedata.PointsRect.X;
+        var old_can_y = this.style.canvas.top || writedata.PointsRect.Y;
+        var width = parseInt(old_width),
+          height = parseInt(old_height),
+          y = Math.abs(parseInt(old_can_y)),
+          x = Math.abs(parseInt(old_can_x));
+        if ((new_width + new_x) > parseInt(old_width + old_x)) {
+          width = new_width + new_x;
+        }
+        if ((new_height + new_y) > parseInt(old_height + old_y)) {
+          height = new_height + new_y;
+        }
+        if (new_x < x) {
+          x = new_x;
+        }
+        if (new_y < y) {
+          y = new_y;
+        }
+        var zoom = this.div_width ? (this.div_width / width) : 1;
         var box = {
+          width: width + 'px',
+          height: height + 'px',
+          'margin-left': -(width) / 2 + 'px',
           background: '#fff',
           zoom: zoom,
-          width: w + "px",
-          height: h + "px",
-          'margin-left': margin_left + 'px',
-          // 'margin-top': margin_top + 'px',
-          // top: top,
-          left: left,
+          _x: x,
+          _y: y
         };
         var canvas = {
           position: 'absolute',
           top: -y + "px",
           left: -x + "px",
         };
-        this.coordinate = {
-          minx: minx,
-          maxx: maxx,
-          miny: miny,
-          maxy: maxy
-        }
         this.style.box = box;
         this.style.canvas = canvas;
       }
@@ -162,10 +141,10 @@ export default {
   },
   mounted() {
     this.ctx = this.$refs.canvas.getContext('2d');
-    if (this.info.length > 0) {
-      this.starttime = window.JSON.parse(this.info[0].writedata).StartTime;
-      this.draw();
-    }
+   if (this.info) {
+        this.starttime = window.JSON.parse(this.info[0].writedata).StartTime;
+        this.draw();
+      }
   }
 
 };
@@ -174,7 +153,8 @@ export default {
 <style scoped>
 .can_box {
   position: relative;
-
+  margin-left: -350px;
+  left: 50%;
   overflow: hidden;
 }
 

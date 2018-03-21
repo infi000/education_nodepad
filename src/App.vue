@@ -15,6 +15,9 @@ export default {
   margin: 0;
   padding: 0
 }
+body{
+      background-color: rgb(155, 192, 201);
+}
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

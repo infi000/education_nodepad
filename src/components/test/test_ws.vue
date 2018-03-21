@@ -15,19 +15,16 @@
           <el-button type="primary" @click="wsSend('password','teacher')">推送</el-button>
         </el-col>
       </el-form-item>
-      <el-form-item label="绑定/解绑">
+      <el-form-item label="绑定">
         <el-col :span="6">
           <el-input v-model="form.binder_wid" placeholder="wid"></el-input>
         </el-col>
-         <el-col class="line" :span="2">-</el-col>
+        <el-col class="line" :span="2">-</el-col>
         <el-col :span="6">
           <el-input v-model="form.binder_sticks" placeholder="sticks"></el-input>
         </el-col>
         <el-col :span="4">
           <el-button type="primary" @click="wsSend('bind','teacher')">绑定</el-button>
-        </el-col>
-        <el-col :span="4">
-          <el-button type="info" @click="wsSend('cancel','teacher')">解绑</el-button>
         </el-col>
       </el-form-item>
       <el-form-item label="笔迹指令">
@@ -39,6 +36,18 @@
         </el-col>
         <el-col :span="4">
           <el-button type="info" @click="wsSend('write_end','teacher','',form.write_data)">结束</el-button>
+        </el-col>
+      </el-form-item>
+      <el-form-item label="取消绑定">
+        <el-col :span="4">
+          <el-input v-model="form.cancel_data" placeholder=""></el-input>
+        </el-col>
+        <el-col class="line" :span="2">-</el-col>
+        <el-col :span="6">
+          <el-input v-model="form.cancel_to" placeholder=""></el-input>
+        </el-col>
+        <el-col :span="4">
+          <el-button type="info" @click="wsSend('cancel','teacher','',form.cancel_data)">确定</el-button>
         </el-col>
       </el-form-item>
       <!-- 分割  -->
@@ -123,6 +132,8 @@ export default {
         resource: '',
         desc: '',
         write_data: '96',
+        cancel_to: 'student123',
+        cancel_data: ""
       }
     }
   },
@@ -149,16 +160,16 @@ export default {
 
       switch (_type) {
         case 'password':
-          o['data']={
-              pname:that.form.pname,
-              key:that.form.key
-            }
+          o['data'] = {
+            pname: that.form.pname,
+            key: that.form.key
+          }
           break;
         case 'bind':
-            o['data']={
-              wid:that.form.binder_wid,
-              sticks:that.form.binder_sticks
-            }
+          o['data'] = {
+            wid: that.form.binder_wid,
+            sticks: that.form.binder_sticks
+          }
           break;
         case 'cancel':
           break;
@@ -170,7 +181,7 @@ export default {
 
           break;
       }
-            console.log(o)
+      console.log(o)
       WS.send(window.JSON.stringify(o));
 
     }

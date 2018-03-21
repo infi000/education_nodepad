@@ -17,14 +17,14 @@
       </el-header>
       <!-- 笔记显示区域 -->
       <el-main style="height:100%;position: relative;overflow: hidden;" >
-        <note :id='id' @loadingOver='removeNoteLoading'></note>
+        <getnote :id='id'></getnote>
       </el-main>
     </el-container>
   </el-main>
 </template>
 <script>
 /*jshint esversion: 6 */
-import note from '@/components/widget/note';
+import getnote from '@/components/widget/getnote';
 export default {
   data() {
     return {
@@ -40,12 +40,9 @@ export default {
     goBack() {
       this.$router.go(-1);
     },
-    removeNoteLoading(){
-
-    }
   },
   components: {
-    note
+    getnote
   },
   created() {
 
