@@ -105,7 +105,8 @@ export default {
         id: id,
         wid: wid,
         nojudge: true,
-        sucf: function(d) {
+        sucf: function($d) {
+          var d=$d.d;
           //获取笔迹信息回调
           //1，处理笔迹CANVAS
           //2，继续获取剩余笔迹

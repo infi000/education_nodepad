@@ -13,7 +13,7 @@ var invoke = function(params, sucf, errf) {
     _errf = errf || function(d) {
       console.log(d);
     },
-    _url = state.HOST_DEV;
+    _url = URL_dev;
   axios.post(_url, qs.stringify(_params)).then(function(result) {
     var data = result.data;
     if (data.res == "success") {
@@ -91,7 +91,7 @@ const mutations = {
    * 建立WS
    */
   wsInit(state) {
-    window.WS = new WebSocket(state.HOST_WS);
+    window.WS = new WebSocket(URL_ws);
     WS.onopen = function() {
       // Web Socket 已连接上，使用 send() 方法发送数据
       // alert("链接成功...");
