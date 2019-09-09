@@ -1,7 +1,7 @@
 // var URL_domain='http://192.168.58.14';
-var URL_domain='http://192.168.58.150';
-var URL_dev=URL_domain+'/teachcourse/admin.php?m=Admin&c=Index';
-var URL_ws='ws://192.168.58.150:8825';
+var URL_domain='http://192.168.1.9';
+var URL_dev=URL_domain+'/admin.php?m=Admin&c=Index';
+var URL_ws='ws://192.168.1.9:8825';
 // var URL_ws='ws://192.168.58.14:8825';
 var MAC=getSearch().mac||123;
 var PARAMS={
